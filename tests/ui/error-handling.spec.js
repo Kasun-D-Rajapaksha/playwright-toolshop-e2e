@@ -1,4 +1,5 @@
-const { test, expect } = require('../../lib/fixtures')
+const { test, expect } = require('../../fixtures')
+const { CUSTOMER } = require('../../utils/env')
 
 test.use({ storageState: { cookies: [], origins: [] } })
 
@@ -38,7 +39,7 @@ test.describe('API failure and edge-state handling', () => {
     )
 
     await loginPage.goto()
-    await loginPage.login('customer@practicesoftwaretesting.com', 'welcome01')
+    await loginPage.login(CUSTOMER.email, CUSTOMER.password)
 
     await expect(loginPage.loginError).toBeVisible()
     await expect(page).toHaveURL(/\/auth\/login/)

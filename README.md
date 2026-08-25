@@ -11,7 +11,7 @@ complementary work rather than a port.
 ## What this suite demonstrates
 
 - **Class-based page objects injected via custom fixtures** — every spec imports
-  `{ test, expect }` from `lib/fixtures.js`, where `test.extend` wires up page object
+  `{ test, expect }` from `fixtures/`, where `test.extend` wires up page object
   classes, an API client, and test-data factories. No spec ever constructs a page object
   or logs in by hand unless the login *is* the scenario.
 - **One-time authentication with `storageState`** — a `setup` project signs in the
@@ -46,10 +46,26 @@ complementary work rather than a port.
 
 | Project | What runs | Browser |
 | --- | --- | --- |
-| `setup` | `tests/setup/auth.setup.js` — saves `storageState` | Chromium |
+| `setup` | `tests/auth.setup.js` — saves `storageState` | Chromium |
 | `chromium` / `firefox` / `webkit` | All `tests/ui/**` specs | Desktop Chrome / Firefox / Safari |
 | `mobile-chrome` | `@smoke`-tagged UI specs only | Pixel 7 emulation |
 | `api` | All `tests/api/**` specs | None (request contexts) |
+
+## Project structure
+
+```
+playwright.config.js     # projects, reporters, shared `use` options
+pages/                   # page objects
+fixtures/                # test.extend — injects pages, API client, factories
+api/                     # browserless Toolshop API client
+utils/                   # environment and shared config
+test-data/               # static files used by specs
+tests/
+  auth.setup.js          # one-time login → playwright/.auth/
+  ui/                    # browser specs
+  api/                   # request-only specs
+playwright/.auth/        # saved storageState (gitignored)
+```
 
 ## Getting started
 
@@ -64,8 +80,9 @@ npm run test:smoke     # @smoke subset on Chromium
 npm run report         # open the last HTML report
 ```
 
-The suite targets the public Toolshop instance by default. Point it elsewhere
-(e.g. a local docker-compose stack) with environment variables:
+The suite targets the public Toolshop instance by default. Copy `.env.example`
+to `.env` and set the customer credentials used by `tests/auth.setup.js`.
+`.env` is gitignored.
 
 | Variable | Default |
 | --- | --- |

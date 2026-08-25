@@ -1,4 +1,4 @@
-const { API_URL } = require('../env')
+const { API_URL } = require('../utils/env')
 
 /**
  * Thin wrapper around a Playwright APIRequestContext for the Toolshop
@@ -37,6 +37,38 @@ class ToolshopApi {
     return body.access_token
   }
 
+  /**
+   * Returns a token for the given credentials. If login fails with 401/400
+   * (account missing after a demo-DB reset), registers that customer first.
+   */
+  async ensureCustomer({ email, password }) {
+    const login = await this.request.post('/users/login', {
+      data: { email, password },
+    })
+    if (login.ok()) {
+      return (await login.json()).access_token
+    }
+
+    const loginStatus = login.status()
+    if (loginStatus !== 401 && loginStatus !== 400) {
+      throw new Error(`Login failed for ${email}: HTTP ${loginStatus} ${await login.text()}`)
+    }
+
+    const registered = await this.register(uniqueCustomer({ email, password }))
+    if (registered.status() === 201) {
+      return this.login({ email, password })
+    }
+
+    // Another worker created the same account in parallel.
+    if (registered.status() === 409) {
+      return this.login({ email, password })
+    }
+
+    throw new Error(
+      `Could not create customer ${email} after login HTTP ${loginStatus}: register HTTP ${registered.status()} ${await registered.text()}`,
+    )
+  }
+
   /** Registers a customer; returns the raw APIResponse for assertions. */
   async register(customer) {
     return this.request.post('/users/register', { data: customer })
@@ -60,6 +92,17 @@ class ToolshopApi {
 
   async products(searchParams = {}) {
     return this.request.get('/products', { params: searchParams })
+  }
+
+  /** First catalog product the UI can actually add to a cart. */
+  async firstInStockProduct() {
+    for (let page = 1; page <= 5; page++) {
+      const body = await (await this.products({ page })).json()
+      const product = body.data.find((item) => item.in_stock)
+      if (product) return product
+      if (!body.data.length) break
+    }
+    throw new Error('No in-stock product found in the catalog')
   }
 
   async categoriesTree() {

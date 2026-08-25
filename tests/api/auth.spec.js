@@ -1,5 +1,5 @@
-const { test, expect, uniqueCustomer } = require('../../lib/fixtures')
-const { CUSTOMER } = require('../../lib/env')
+const { test, expect, uniqueCustomer } = require('../../fixtures')
+const { CUSTOMER } = require('../../utils/env')
 
 test.describe('user auth token lifecycle', () => {
   test('logs in and fetches the profile with the token', async ({ api, customerToken }) => {

@@ -12,7 +12,8 @@ class FavoritesPage {
   }
 
   itemByName(name) {
-    return this.items.filter({ hasText: name })
+    // Exact text so "Pliers" does not also match "Combination Pliers".
+    return this.items.filter({ has: this.page.getByText(name, { exact: true }) })
   }
 
   async remove(name) {

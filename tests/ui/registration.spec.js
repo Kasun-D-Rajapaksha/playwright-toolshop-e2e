@@ -1,4 +1,4 @@
-const { test, expect, uniqueCustomer } = require('../../lib/fixtures')
+const { test, expect, uniqueCustomer } = require('../../fixtures')
 
 // Registration must start signed out.
 test.use({ storageState: { cookies: [], origins: [] } })

@@ -1,3 +1,5 @@
+const { expect } = require('@playwright/test')
+
 /** Product detail page. */
 class ProductPage {
   /** @param {import('@playwright/test').Page} page */
@@ -13,7 +15,13 @@ class ProductPage {
     this.toast = page.getByRole('alert')
   }
 
+  async goto(productId) {
+    await this.page.goto(`/product/${productId}`)
+    await this.name.waitFor()
+  }
+
   async addToCart() {
+    await expect(this.addToCartButton).toBeEnabled()
     await this.addToCartButton.click()
   }
 

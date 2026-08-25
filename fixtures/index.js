@@ -1,13 +1,13 @@
 const base = require('@playwright/test')
-const { HomePage } = require('./pages/HomePage')
-const { ProductPage } = require('./pages/ProductPage')
-const { LoginPage } = require('./pages/LoginPage')
-const { RegisterPage } = require('./pages/RegisterPage')
-const { CartCheckoutPage } = require('./pages/CartCheckoutPage')
-const { ContactPage } = require('./pages/ContactPage')
-const { FavoritesPage } = require('./pages/FavoritesPage')
-const { ToolshopApi, uniqueCustomer } = require('./api/toolshopApi')
-const { CUSTOMER } = require('./env')
+const { HomePage } = require('../pages/HomePage')
+const { ProductPage } = require('../pages/ProductPage')
+const { LoginPage } = require('../pages/LoginPage')
+const { RegisterPage } = require('../pages/RegisterPage')
+const { CartCheckoutPage } = require('../pages/CartCheckoutPage')
+const { ContactPage } = require('../pages/ContactPage')
+const { FavoritesPage } = require('../pages/FavoritesPage')
+const { ToolshopApi, uniqueCustomer } = require('../api/toolshopApi')
+const { CUSTOMER } = require('../utils/env')
 
 /**
  * Custom fixtures: every spec imports { test, expect } from here instead of
@@ -44,19 +44,24 @@ const test = base.test.extend({
     await api.dispose()
   },
 
-  /** Bearer token for the published demo customer. */
+  /** Bearer token for the configured customer (created if missing). */
   customerToken: async ({ api }, use) => {
-    await use(await api.login(CUSTOMER))
+    await use(await api.ensureCustomer(CUSTOMER))
   },
 
   /** A brand-new customer registered through the API, unique per test. */
   testCustomer: async ({ api }, use) => {
-    const customer = uniqueCustomer()
-    const response = await api.register(customer)
-    if (response.status() !== 201) {
-      throw new Error(`Could not register test customer: HTTP ${response.status()}`)
+    let lastStatus = 'unknown'
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      const customer = uniqueCustomer()
+      const response = await api.register(customer)
+      lastStatus = response.status()
+      if (lastStatus === 201) {
+        await use(customer)
+        return
+      }
     }
-    await use(customer)
+    throw new Error(`Could not register test customer: HTTP ${lastStatus}`)
   },
 })
 

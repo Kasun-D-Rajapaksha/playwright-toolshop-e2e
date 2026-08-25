@@ -1,4 +1,4 @@
-const { test, expect } = require('../../lib/fixtures')
+const { test, expect } = require('../../fixtures')
 
 // These specs run in the browserless `api` project; `api` wraps a request
 // context pointed at https://api.practicesoftwaretesting.com.

@@ -1,5 +1,5 @@
-const { test, expect } = require('../../lib/fixtures')
-const { STORAGE_STATE } = require('../../lib/env')
+const { test, expect } = require('../../fixtures')
+const { STORAGE_STATE } = require('../../utils/env')
 
 test.describe('favorites (authenticated via storageState)', () => {
   // Reuse the session saved by the setup project: no login UI in these tests.

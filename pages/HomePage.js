@@ -7,8 +7,10 @@ class HomePage {
     // Header / navigation
     this.signInLink = page.getByTestId('nav-sign-in')
     this.navMenu = page.getByTestId('nav-menu')
+    this.navToggler = page.locator('.navbar-toggler')
     this.cartLink = page.getByTestId('nav-cart')
     this.cartQuantity = page.getByTestId('cart-quantity')
+    this.filtersToggle = page.locator('[data-bs-target="#filters"], [data-test="filters"]')
 
     // Search and sorting
     this.searchInput = page.getByTestId('search-query')
@@ -31,6 +33,7 @@ class HomePage {
   }
 
   async search(query) {
+    await this.revealIfHidden(this.searchInput)
     await this.searchInput.fill(query)
     await this.searchSubmit.click()
   }
@@ -41,16 +44,44 @@ class HomePage {
     return responsePromise
   }
 
+  async openCart() {
+    await this.revealIfHidden(this.cartLink)
+    await this.cartLink.click()
+  }
+
+  /**
+   * On Pixel-sized viewports the Bootstrap navbar and filter sidebar are
+   * collapsed. Expand them before interacting with a hidden control.
+   */
+  async revealIfHidden(locator) {
+    if (await locator.isVisible()) return
+
+    if (await this.navToggler.isVisible()) {
+      await this.navToggler.click()
+      if (await locator.isVisible()) return
+    }
+
+    const filterToggle = this.filtersToggle.first()
+    if (await filterToggle.isVisible()) {
+      await filterToggle.click()
+      if (await locator.isVisible()) return
+    }
+
+    await locator.scrollIntoViewIfNeeded()
+  }
+
   /**
    * Checks a category or brand checkbox by its visible label and returns
    * the parsed JSON of the resulting products request, so tests can assert
    * the UI against the exact payload the app received.
    */
   async filterBy(label) {
+    const checkbox = this.page.getByLabel(label, { exact: true })
+    await this.revealIfHidden(checkbox)
     const responsePromise = this.waitForProducts(
       (query) => 'by_category' in query || 'by_brand' in query,
     )
-    await this.page.getByLabel(label, { exact: true }).check()
+    await checkbox.check()
     return responsePromise
   }
 
@@ -88,7 +119,7 @@ class HomePage {
   }
 
   async openProduct(name) {
-    await this.productNames.filter({ hasText: name }).first().click()
+    await this.productNames.getByText(name, { exact: true }).click()
   }
 
   /**

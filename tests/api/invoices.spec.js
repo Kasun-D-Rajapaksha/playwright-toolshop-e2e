@@ -1,4 +1,4 @@
-const { test, expect } = require('../../lib/fixtures')
+const { test, expect } = require('../../fixtures')
 
 test.describe('invoices API', () => {
   test('requires authentication', async ({ api }) => {

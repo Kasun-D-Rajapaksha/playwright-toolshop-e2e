@@ -1,11 +1,11 @@
 const path = require('path')
-const { test, expect } = require('../../lib/fixtures')
+const { test, expect } = require('../../fixtures')
 
 test.use({ storageState: { cookies: [], origins: [] } })
 
 // The Toolshop contact endpoint only accepts empty .txt attachments,
 // which makes it a handy fixture for exercising the upload path.
-const EMPTY_ATTACHMENT = path.join(__dirname, '..', 'fixtures', 'empty-attachment.txt')
+const EMPTY_ATTACHMENT = path.join(__dirname, '../../test-data/empty-attachment.txt')
 
 const VALID_MESSAGE =
   'This is an automated end-to-end test message. It is intentionally long enough to satisfy the fifty character minimum length rule of the form.'

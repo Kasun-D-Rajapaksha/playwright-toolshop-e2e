@@ -1,6 +1,6 @@
 // @ts-check
 const { defineConfig, devices } = require('@playwright/test')
-const { BASE_URL, API_URL } = require('./lib/env')
+const { BASE_URL, API_URL } = require('./utils/env')
 
 module.exports = defineConfig({
   testDir: './tests',
@@ -29,7 +29,7 @@ module.exports = defineConfig({
     // Logs in once and saves storageState for authenticated specs.
     {
       name: 'setup',
-      testMatch: /tests\/setup\/.*\.setup\.js/,
+      testMatch: /.*\.setup\.js/,
       use: { ...devices['Desktop Chrome'] },
     },
 
